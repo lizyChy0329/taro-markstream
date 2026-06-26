@@ -1,11 +1,11 @@
 ---
 name: release-pipeline
-description: Set up the full npm package release pipeline — npmjs token, GitHub repo config, standard-version, and GitHub Actions CI with tag-based publish. Use when the user wants to configure release automation, set up npm publish CI, or mentions standard-version / tag-based publish.
+description: Set up the full npm package release pipeline — npmjs token, GitHub repo config, bumpp versioning, and GitHub Actions CI with auto bump + publish on merge to main. Use when the user wants to configure release automation, set up npm publish CI, or mentions bumpp / auto-versioning.
 ---
 
 # Release Pipeline
 
-Sets up the full release pipeline for an npm package: from token generation through automated CI publish on tag.
+Sets up the full release pipeline for an npm package: from token generation through automated CI bump + publish on merge to main.
 
 Manual steps pause and prompt the user. Say "OK" to proceed to the next step.
 
@@ -34,8 +34,6 @@ Update the target package's `package.json`:
 - `homepage`
 - `bugs.url`
 
-Set `gh_repo` for subsequent steps.
-
 Completion criterion: repo URL obtained and `package.json` updated.
 
 ### 3. Configure NPM_TOKEN in GitHub secrets
@@ -62,68 +60,107 @@ pnpm --filter {{package_name}} build
 cd packages/{{package_dir}} && npm publish --registry https://registry.npmjs.org
 ```
 
+If no tag exists for the current version, create one:
+
+```bash
+git tag v$(node -p "require('./packages/{{package_dir}}/package.json').version")
+```
+
 Completion criterion: `npm publish` exits 0. If it fails, surface the error and ask user to fix before retrying.
 
-### 5. Install and configure standard-version
+### 5. Install and configure bumpp
 
 **Automatic.** Run:
 
 ```bash
-pnpm --filter root -D add standard-version
+pnpm add -D -w bumpp
 ```
 
 Add to root `package.json` scripts:
 
 ```json
-"release": "standard-version",
-"postrelease": "git push --follow-tags origin main"
+"bump:patch": "bumpp --patch --commit \"chore: release v\" --tag --push",
+"bump:minor": "bumpp --minor --commit \"chore: release v\" --tag --push",
+"bump:major": "bumpp --major --commit \"chore: release v\" --tag --push"
 ```
 
-Add `.versionrc` to root:
+Completion criterion: `bumpp` in devDependencies, bump scripts in root `package.json`.
 
-```json
-{
-  "bumpFiles": [
-    "package.json",
-    "packages/{{package_dir}}/package.json"
-  ]
-}
-```
+### 6. Configure CI workflow
 
-Completion criterion: `standard-version` in devDependencies, release scripts in root `package.json`, `.versionrc` created.
-
-### 6. Switch CI to tag-based publish
-
-**Automatic.** Update `.github/workflows/ci.yml`:
-
-Change publish job `if` condition to:
+**Automatic.** Replace `.github/workflows/ci.yml` with:
 
 ```yaml
-publish:
-  if: startsWith(github.ref, 'refs/tags/v')
-```
+name: CI
 
-Add a version-check step:
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Bump type'
+        default: 'patch'
+        type: choice
+        options: [patch, minor, major]
 
-```yaml
-      - run: |
-          # Verify tag matches package version
-          TAG_VERSION=${GITHUB_REF_NAME#v}
-          PKG_VERSION=$(node -p "require('./packages/{{package_dir}}/package.json').version")
-          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
-            echo "Tag v$TAG_VERSION does not match package version $PKG_VERSION"
-            exit 1
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter {{package_name}} build
+
+  publish:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Bump version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            npx bumpp --${{ inputs.bump }} --commit "chore: release v" --tag --push
+          else
+            npx bumpp --patch --commit "chore: release v" --tag --push
           fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: pnpm --filter {{package_name}} build
+      - run: pnpm --filter {{package_name}} publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
-Remove `if: github.ref == 'refs/heads/main' && github.event_name == 'push'` from publish job.
-
-Completion criterion: CI workflow updated and version validation in place.
+Completion criterion: CI workflow updated with bumpp + publish logic.
 
 ### 7. Verify
 
-- [ ] `standard-version` installed and scripts added to root `package.json`
-- [ ] `.versionrc` created at repo root
-- [ ] CI publish job triggers on tag push only
-- [ ] CI publish job validates tag matches package version
-- [ ] Run `pnpm release --dry-run` to preview version bump
+- [ ] `bumpp` installed and bump scripts added to root `package.json`
+- [ ] CI publish job bumps version and publishes on push to main
+- [ ] `workflow_dispatch` available in GitHub Actions UI for manual minor/major
+- [ ] Run `pnpm bump:patch --dry-run` to preview version bump
+
+### Runtime: how to release
+
+- **Merge to main** → CI auto bumps patch + publishes
+- **Manual minor/major**: go to GitHub → Actions → CI → Run workflow → select bump type → Run

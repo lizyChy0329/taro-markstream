@@ -7,13 +7,12 @@
     "build": "pnpm --filter taro-markstream build",
     "dev:weapp": "pnpm --filter playground-taro dev:weapp",
     "build:weapp": "pnpm --filter playground-taro build:weapp",
-    "release": "standard-version --release-as minor",
-    "release:patch": "standard-version --release-as patch",
-    "release:major": "standard-version --release-as major",
-    "postrelease": "git push --follow-tags origin main"
+    "bump:patch": "bumpp --patch --commit \"chore: release v\" --tag --push",
+    "bump:minor": "bumpp --minor --commit \"chore: release v\" --tag --push",
+    "bump:major": "bumpp --major --commit \"chore: release v\" --tag --push"
   },
   "packageManager": "pnpm@11.2.2",
   "devDependencies": {
-    "standard-version": "^9.5.0"
+    "bumpp": "^11.1.0"
   }
 }

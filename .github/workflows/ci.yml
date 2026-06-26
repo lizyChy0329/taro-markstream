@@ -3,9 +3,15 @@ name: CI
 on:
   push:
     branches: [main]
-    tags: ['v*']
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Bump type'
+        default: 'patch'
+        type: choice
+        options: [patch, minor, major]
 
 jobs:
   build:
@@ -22,10 +28,12 @@ jobs:
 
   publish:
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -33,13 +41,17 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: |
-          TAG_VERSION=${GITHUB_REF_NAME#v}
-          PKG_VERSION=$(node -p "require('./packages/taro-markstream-vue/package.json').version")
-          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
-            echo "Tag v$TAG_VERSION does not match package version $PKG_VERSION"
-            exit 1
+
+      - name: Bump version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            npx bumpp --${{ inputs.bump }} --commit "chore: release v" --tag --push
+          else
+            npx bumpp --patch --commit "chore: release v" --tag --push
           fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - run: pnpm --filter taro-markstream build
       - run: pnpm --filter taro-markstream publish --no-git-checks
         env:
