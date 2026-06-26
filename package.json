@@ -1,0 +1,12 @@
+{
+  "name": "taro-markstream-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "taro-markstream monorepo",
+  "scripts": {
+    "build": "pnpm --filter taro-markstream build",
+    "dev:weapp": "pnpm --filter playground-taro dev:weapp",
+    "build:weapp": "pnpm --filter playground-taro build:weapp"
+  },
+  "packageManager": "pnpm@11.2.2"
+}

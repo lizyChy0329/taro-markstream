@@ -1,0 +1,63 @@
+{
+  "name": "taro-markstream",
+  "type": "module",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Taro 4 streaming Markdown renderer for AI chat -- minimal Vue 3 edition",
+  "keywords": [
+    "taro",
+    "taro4",
+    "miniprogram",
+    "weapp",
+    "wechat",
+    "vue3",
+    "markdown",
+    "streaming-markdown",
+    "ai-chat",
+    "llm"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lizyChy0329/taro-markstream.git"
+  },
+  "homepage": "https://github.com/lizyChy0329/taro-markstream#readme",
+  "bugs": {
+    "url": "https://github.com/lizyChy0329/taro-markstream/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    "./vue": {
+      "types": "./dist/vue/index.d.ts",
+      "import": "./dist/vue/index.js"
+    },
+    "./vue/index.css": "./dist/vue/index.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsdown --watch",
+    "build": "tsdown && cp src/index.css dist/vue/index.css",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "peerDependencies": {
+    "vue": ">=3.0.0"
+  },
+  "dependencies": {
+    "markstream-core": "^1.0.3",
+    "stream-markdown-parser": "^1.0.7"
+  },
+  "devDependencies": {
+    "@tarojs/components": "4.2.0",
+    "@tarojs/taro": "4.2.0",
+    "tsdown": "^0.15.12",
+    "typescript": "^5.9.3",
+    "vue": "^3.5.38",
+    "vue-tsc": "^2.2.12"
+  }
+}
