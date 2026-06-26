@@ -1,5 +1,6 @@
 <template>
   <view class="playground">
+    123123
     <view class="toolbar">
       <view class="preset-list">
         <view
@@ -46,11 +47,12 @@
 import Taro from '@tarojs/taro'
 import { ref, computed, onMounted } from 'vue'
 import { MarkdownRender, useSmoothMarkdownStream } from 'taro-markstream/vue'
-import { TEST_MARKDOWN } from './markdownData'
+import { streamContent } from '../../markdown'
 
-const presets = TEST_MARKDOWN
-console.log("🚀 ~ presets:", presets)
-const activePreset = ref('长文混合')
+const presets = {
+  '综合示例': streamContent,
+}
+const activePreset = ref(Object.keys(presets)[0])
 const smoothEnabled = ref(true)
 const paused = ref(false)
 const isFinal = ref(false)

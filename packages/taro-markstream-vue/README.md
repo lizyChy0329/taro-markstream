@@ -108,20 +108,49 @@ finish()
 
 | 语法 | 渲染方式 |
 |------|----------|
-| `#` ~ `######` 标题 | `<h1>` ~ `<h6>` |
-| `**粗体**` | `<strong>` |
-| `*斜体*` | `<em>` |
-| `~~删除线~~` | `<del>` |
-| `` `行内代码` `` | `<code>` |
-| `![alt](src)` 图片 | `<img>`（rich-text 渲染） |
-| `[text](url)` 链接 | `<a>` → 触发 `link-click` 事件 |
-| `` ```code```` 代码块 | `<pre><code>` |
-| `> blockquote` 引用 | `<blockquote>` |
-| `-` / `*` 无序列表 | `<ul><li>` |
-| `1.` 有序列表 | `<ol><li>` |
-| `---` 分割线 | `<hr>` |
-| `\| 表 \|` 表格 | `<table>` |
-| `\n` 换行 | `<br>` |
+| `#` ~ `######` 标题 | `<view class="tm-h1~6">` |
+| `**粗体**` | `<text class="tm-strong">` |
+| `*斜体*` | `<text class="tm-em">` |
+| `~~删除线~~` | `<text class="tm-del">` |
+| `` `行内代码` `` | `<text class="tm-code">` |
+| `![alt](src)` 图片 | `<image>` |
+| `[text](url)` 链接 | `<text class="tm-link">` → `@link-click` 事件 |
+| `` ```language `` 代码块 | `<view class="tm-code-block">` + 语法高亮 |
+| `> blockquote` 引用 | `<view class="tm-blockquote">` |
+| `-` / `*` 无序列表 | `<view class="tm-list tm-list-ul">` |
+| `1.` 有序列表 | `<view class="tm-list tm-list-ol">` + 计数器 |
+| `---` 分割线 | `<view class="tm-hr">` |
+| `\| 表 \|` 表格 | `<view class="tm-table">` flex 布局 |
+| 段落 | `<view class="tm-p">` |
+| `<br>` 或行尾 `\` 换行 | `<text class="tm-br">` |
+| HTML 标签 | `<text class="tm-html">` 原文输出 |
+
+### ✅ 已支持（高级语法）
+
+| 语法 | 渲染方式 |
+|------|----------|
+| `==高亮==` | `<text class="tm-hl">` |
+| `<ins>` / `++插入++` | `<text class="tm-ins">` |
+| `<sub>` / `~下标~` | `<text class="tm-sub">` |
+| `<sup>` / `^上标^` | `<text class="tm-sup">` |
+| `- [x]` 任务列表 | `<text>[x]</text>` + 文本 |
+| `:smile:` Emoji 短代码 | 显示原文 |
+| `::: warning` 警告块 | 带颜色边框的容器（kind: warning/danger/tip/note/info） |
+| 定义列表：`术语 : 定义` | `<view class="tm-dt">` / `<view class="tm-dd">` |
+| `[^1]` 脚注 | 带锚点的脚注块 + ↩ 返回 |
+| `diff json` diff 代码块 | 绿色 `+` / 红色 `-` 行渲染 |
+| `<thinking>` 自定义标签 | 灰底虚线边框容器 |
+| 嵌套列表（有序/无序混合） | 递归渲染 |
+
+### ⬜ 置灰标记（小程序平台限制）
+
+| 语法 | 原因 |
+|------|------|
+| `$E=mc^2$` / `$$...$$` 数学公式 | 需要 KaTeX DOM 渲染 |
+| `` ```mermaid `` Mermaid 图 | 需要 DOM + SVG + Web Worker |
+| `` ```infographic `` Infographic 图 | 需要 DOM + SVG 渲染 |
+| `` ```d2 `` D2 图 | 需要 DOM + SVG 渲染 |
+| `` ```svg `` SVG 代码块 | 小程序无 SVG 元素支持 |
 
 ### ✅ 流式支持
 

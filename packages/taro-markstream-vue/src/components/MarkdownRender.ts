@@ -7,7 +7,7 @@ import { renderTree } from './nodes/renderer'
 
 let md: MarkdownIt | null = null
 try {
-  md = getMarkdown()
+  md = getMarkdown(undefined, { customHtmlTags: ['thinking'], enableContainers: true })
 } catch {
   md = null
 }
@@ -36,6 +36,7 @@ export default defineComponent({
         try {
           const nodes: ParsedNode[] = parseMarkdownToStructure(props.content, md, {
             final: props.final,
+            customHtmlTags: ['thinking'],
           })
           const ctx: RenderContext = {
             onLinkClick: (href) => emit('link-click', { href }),
