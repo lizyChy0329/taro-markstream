@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
     branches: [main]
 
@@ -21,7 +22,7 @@ jobs:
 
   publish:
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,6 +33,13 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: |
+          TAG_VERSION=${GITHUB_REF_NAME#v}
+          PKG_VERSION=$(node -p "require('./packages/taro-markstream-vue/package.json').version")
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "Tag v$TAG_VERSION does not match package version $PKG_VERSION"
+            exit 1
+          fi
       - run: pnpm --filter taro-markstream build
       - run: pnpm --filter taro-markstream publish --no-git-checks
         env:
