@@ -301,6 +301,36 @@ vpr dev
 pnpm --filter taro-markstream-vue typecheck
 ```
 
+## 截图
+
+### 控制区域
+
+<img width="368" height="177" alt="control" src="https://github.com/user-attachments/assets/4c7af427-45b2-4658-b2f5-34d6c7f856b2" />
+
+### 样式0
+
+<img width="331" height="192" alt="thinking" src="https://github.com/user-attachments/assets/82886565-44ca-4a5f-bf21-c0b08479f36e" />
+
+### 样式1
+
+<img width="341" height="590" alt="1" src="https://github.com/user-attachments/assets/c1c48352-28dd-4c06-921b-7bf492a141ce" />
+
+### 样式2
+
+<img width="343" height="566" alt="2" src="https://github.com/user-attachments/assets/900eda7b-bef0-4427-b6e1-280c6c2ef8e7" />
+
+### 样式3
+
+<img width="351" height="684" alt="3" src="https://github.com/user-attachments/assets/f4173eb7-8654-4e4a-b2d0-542cfe2efb6f" />
+
+### 样式4
+
+<img width="352" height="681" alt="4" src="https://github.com/user-attachments/assets/1f2f77d4-a16f-4c89-a7ff-1f0143dd52a0" />
+
+### 样式5
+
+<img width="351" height="667" alt="5" src="https://github.com/user-attachments/assets/0e54e977-d2df-4145-a66f-de707e26f451" />
+
 ## License
 
 MIT
