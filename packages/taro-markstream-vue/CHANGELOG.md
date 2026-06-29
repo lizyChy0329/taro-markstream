@@ -1,5 +1,11 @@
 # taro-markstream-vue
 
+## 1.1.1
+
+### Patch Changes
+
+- 5554239: fix: use changeset publish instead of pnpm publish for release script to ensure git tags and GitHub releases are auto-created
+
 ## 1.1.0
 
 ### Minor Changes
