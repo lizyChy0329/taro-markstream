@@ -227,7 +227,10 @@ function renderNode(node: ParsedNode, ctx: RenderContext): VNode | null {
     case 'paragraph': {
       const children = renderInlineChildren(node, ctx)
       if (!children.length) return null
-      return h('view', { class: 'tm-p' }, children)
+      const hasRtl = ((node as any).children as ParsedNode[] | undefined)?.some(
+        child => child.type === 'text' && isRtl(String((child as any).content || '')),
+      )
+      return h('view', { class: `tm-p${hasRtl ? ' tm-p-rtl' : ''}` }, children)
     }
     case 'code_block': {
       const lang = String(anyNode.language || '').toLowerCase()

@@ -17,6 +17,7 @@
 .tm-h6 { font-size: 28rpx; font-weight: 700; margin: 16rpx 0 8rpx; }
 
 .tm-p { margin: 12rpx 0; }
+.tm-p-rtl { text-align: right; }
 
 .tm-strong { font-weight: 700; }
 .tm-em { font-style: italic; }
