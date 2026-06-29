@@ -24,7 +24,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter taro-markstream build
+      - run: pnpm --filter taro-markstream-vue build
 
   publish:
     needs: build
@@ -52,7 +52,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: pnpm --filter taro-markstream build
-      - run: pnpm --filter taro-markstream publish --no-git-checks
+      - run: pnpm --filter taro-markstream-vue build
+      - run: pnpm --filter taro-markstream-vue publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
