@@ -14,21 +14,7 @@ on:
         options: [patch, minor, major]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter taro-markstream-vue build
-
-  publish:
-    needs: build
-    if: github.event_name != 'pull_request'
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,18 +27,26 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter taro-markstream-vue typecheck
+      - run: pnpm --filter taro-markstream-vue build
 
-      - name: Bump version
+      - name: Bump version (push / workflow_dispatch only)
+        if: github.event_name != 'pull_request'
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            npx bumpp --${{ inputs.bump }} --commit "chore: release v" --tag --push
+            npx bumpp --all --${{ inputs.bump }} --commit "chore: release v [skip ci]" --tag --push
           else
-            npx bumpp --patch --commit "chore: release v" --tag --push
+            npx bumpp --all --patch --commit "chore: release v [skip ci]" --tag --push
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: pnpm --filter taro-markstream-vue build
-      - run: pnpm --filter taro-markstream-vue publish --no-git-checks
+      - name: Build after bump
+        if: github.event_name != 'pull_request'
+        run: pnpm --filter taro-markstream-vue build
+
+      - name: Publish to npm
+        if: github.event_name != 'pull_request'
+        run: pnpm --filter taro-markstream-vue publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
