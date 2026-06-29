@@ -10,7 +10,7 @@
     "build:weapp": "pnpm --filter playground-taro build:weapp",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "pnpm --filter taro-markstream-vue build && pnpm --filter taro-markstream-vue publish --no-git-checks"
+    "release": "pnpm --filter taro-markstream-vue build && pnpm changeset publish"
   },
   "packageManager": "pnpm@11.2.2",
   "devDependencies": {

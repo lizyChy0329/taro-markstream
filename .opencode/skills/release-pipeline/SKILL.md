@@ -1,166 +1,113 @@
 ---
 name: release-pipeline
-description: Set up the full npm package release pipeline — npmjs token, GitHub repo config, bumpp versioning, and GitHub Actions CI with auto bump + publish on merge to main. Use when the user wants to configure release automation, set up npm publish CI, or mentions bumpp / auto-versioning.
+description: changesets 驱动的 npm 包发布流程。Use when the user wants to publish/release a new version, mentions npm publish/version bump/changeset/release/tag, asks why CI didn't publish, or encounters release failure.
 ---
 
-# Release Pipeline
+# 发布工作流
 
-Sets up the full release pipeline for an npm package: from token generation through automated CI bump + publish on merge to main.
+taro-markstream-vue 使用 **changesets** 管理版本发布。每次合并 PR 到 main 后，changesets/action 自动创建 "Version Package" PR，合并它即触发 npm publish + GitHub Release。
 
-Manual steps pause and prompt the user. Say "OK" to proceed to the next step.
+## 步骤
 
-## Steps
+### 1. 开发 + 添加 changeset
 
-### 1. Generate npm access token
-
-**Manual.** Ask the user:
-
-> Go to [npmjs.com → Access Tokens](https://www.npmjs.com/settings/~/tokens) and create a **Publish**-scoped token. Copy it and paste it here.
-
-Wait for user input. Store as `NPM_TOKEN`.
-
-Completion criterion: token obtained from user.
-
-### 2. Create GitHub repository
-
-**Manual.** Ask the user:
-
-> Create a new repository on GitHub (or confirm the existing one). What is the full repo URL (e.g. `https://github.com/owner/repo`)?
-
-Wait for user input.
-
-Update the target package's `package.json`:
-- `repository.url`
-- `homepage`
-- `bugs.url`
-
-Completion criterion: repo URL obtained and `package.json` updated.
-
-### 3. Configure NPM_TOKEN in GitHub secrets
-
-**Manual.** Ask the user:
-
-> Go to GitHub repo → Settings → Secrets and variables → Actions. Create a repository secret named `NPM_TOKEN` with the token from step 1.
-
-Wait for user to confirm "OK".
-
-Completion criterion: user confirmed.
-
-### 4. Local build + manual publish (first release)
-
-**Manual.** Ask the user:
-
-> Ready to do the first publish manually? I'll run the build and publish command. Confirm the package version in `package.json` first. Say "OK" to proceed.
-
-On "OK":
+在 `v1` 分支开发，每项有意义的改动需要附带一个 changeset 文件：
 
 ```bash
-pnpm install --frozen-lockfile
-pnpm --filter {{package_name}} build
-cd packages/{{package_dir}} && npm publish --registry https://registry.npmjs.org
+pnpm changeset
+# 选择 bump 类型：patch（修复）/ minor（新功能）/ major（破坏性变更）
+# 填写变更描述
 ```
 
-If no tag exists for the current version, create one:
+或手动创建 `.changeset/<name>.md`：
 
-```bash
-git tag v$(node -p "require('./packages/{{package_dir}}/package.json').version")
+```markdown
+---
+'taro-markstream-vue': minor
+---
+
+feat: add RTL text support for paragraph rendering
 ```
 
-Completion criterion: `npm publish` exits 0. If it fails, surface the error and ask user to fix before retrying.
+**完成标准：** `.changeset/*.md` 文件存在，bump 类型与变更匹配
 
-### 5. Install and configure bumpp
+### 2. 提 PR v1 → main
 
-**Automatic.** Run:
+包含 changeset 文件的 PR 合并到 main 后，`changesets/action` 自动：
+- 检测 pending changeset
+- 创建 "Version Package" PR（bump 版本号 + 生成 CHANGELOG）
 
-```bash
-pnpm add -D -w bumpp
-```
+**完成标准：** GitHub 上出现新的 "Version Package" PR
 
-Add to root `package.json` scripts:
+### 3. 合并 Version Package PR
 
-```json
-"bump:patch": "bumpp --patch --commit \"chore: release v\" --tag --push",
-"bump:minor": "bumpp --minor --commit \"chore: release v\" --tag --push",
-"bump:major": "bumpp --major --commit \"chore: release v\" --tag --push"
-```
+合并后 CI `release` job 自动执行：
 
-Completion criterion: `bumpp` in devDependencies, bump scripts in root `package.json`.
+1. `pnpm --filter taro-markstream-vue build` — 构建 lib
+2. `pnpm changeset publish` — 发布到 npm + 创建 git tag
+3. `createGithubReleases: true` — 创建 GitHub Release
 
-### 6. Configure CI workflow
+**完成标准：** 检查 npm / GitHub Releases / git tag 三者一致
 
-**Automatic.** Replace `.github/workflows/ci.yml` with:
+### 4. 验证
+
+| 检查项 | 命令 |
+|--------|------|
+| npm 版本 | `npm view taro-markstream-vue version` |
+| GitHub Release | `gh release list --json tagName` |
+| git tag | `git tag -l \| sort -V` |
+
+---
+
+## 关键文件
+
+| 文件 | 作用 |
+|------|------|
+| `.github/workflows/ci.yml` | CI 配置 — check（PR）和 release（push to main）两个 job |
+| `package.json#scripts.release` | `build && changeset publish` — 必须用 `changeset publish` 而非 `pnpm publish` |
+| `package.json#scripts.changeset` | `changeset` — 创建新 changeset |
+| `.changeset/*.md` | pending changeset，合并后自动消费 |
+
+## CI 配置要点
 
 ```yaml
-name: CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
-    inputs:
-      bump:
-        description: 'Bump type'
-        default: 'patch'
-        type: choice
-        options: [patch, minor, major]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter {{package_name}} build
-
-  publish:
-    needs: build
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          registry-url: https://registry.npmjs.org
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-
-      - name: Bump version
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            npx bumpp --${{ inputs.bump }} --commit "chore: release v" --tag --push
-          else
-            npx bumpp --patch --commit "chore: release v" --tag --push
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: pnpm --filter {{package_name}} build
-      - run: pnpm --filter {{package_name}} publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+release:
+  if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  permissions:
+    contents: write           # 必须：创建 tag 和 release
+    pull-requests: write      # 必须：创建 Version Package PR
+  steps:
+    - uses: changesets/action@v1
+      with:
+        publish: pnpm release
+        createGithubReleases: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
-Completion criterion: CI workflow updated with bumpp + publish logic.
+## 陷阱
 
-### 7. Verify
+### PR 不含 changeset → 无发布
 
-- [ ] `bumpp` installed and bump scripts added to root `package.json`
-- [ ] CI publish job bumps version and publishes on push to main
-- [ ] `workflow_dispatch` available in GitHub Actions UI for manual minor/major
-- [ ] Run `pnpm bump:patch --dry-run` to preview version bump
+合并后 `changesets/action` 找不到 pending changeset，跳过所有操作。**修复：** 补 `.changeset/*.md`，重提 PR。
 
-### Runtime: how to release
+### 合并了 Version Package PR 却没有 tag/Release
 
-- **Merge to main** → CI auto bumps patch + publishes
-- **Manual minor/major**: go to GitHub → Actions → CI → Run workflow → select bump type → Run
+根因是 `release` 脚本用了 `pnpm publish` 而不是 `changeset publish`。`pnpm publish` 直接发布到 npm 但不创建 tag，`createGithubReleases` 依赖 tag 存在才能创建 Release。**修复：** `release` 脚本必须用 `pnpm changeset publish`。
+
+### 旧分支带来僵尸 changeset
+
+`v1` 分支可能残留之前已经消费过的 `.changeset/*.md`，合并到 main 后导致 changesets 重复计算版本号。**修复：** 合并前确认 `.changeset/` 目录只有本次需要的新 changeset。
+
+### Force push 回退 main
+
+Force push main 会删除版本提交（version bump + CHANGELOG），让 main 退回到旧版本号。**禁止 force push main。**
+
+### CI release job 因权限失败
+
+`release` job 需要 `permissions: contents: write`（打 tag + 创建 Release）和 `pull-requests: write`（创建 Version Package PR）。缺少则静默跳过。
+
+### NPM_TOKEN 未配置
+
+在 GitHub 仓库 Settings → Secrets and variables → Actions 中必须设置 `NPM_TOKEN`（npm publish 用）和 `GITHUB_TOKEN`（自动注入，无需手动设置）。
