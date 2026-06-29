@@ -45,7 +45,8 @@ function renderInlines(node: ParsedNode, ctx: RenderContext): (VNode | string)[]
 
   switch (type) {
     case 'text': {
-      const text = String(anyNode.content || '')
+      const text = String(anyNode.content || '').trim()
+      if (!text) return []
       if (isRtl(text)) return [h('text', { class: 'tm-rtl' }, text)]
       return [h('text', {}, text)]
     }
@@ -97,9 +98,14 @@ function renderInlines(node: ParsedNode, ctx: RenderContext): (VNode | string)[]
     case 'emoji':
       return [h('text', { class: 'tm-emoji' }, String(anyNode.markup || anyNode.name || ''))]
     case 'checkbox_input': {
-      const checked = anyNode.checked ? '[x]' : '[ ]'
-      return [h('text', { class: 'tm-checkbox-input' }, checked)]
+      const checked = anyNode.checked
+      return [h('view', {
+        class: `tm-checkbox-input${checked ? ' tm-checked' : ''}`,
+      }, checked ? [h('text', { class: 'tm-checkbox-tick' }, '✓')] : undefined)]
     }
+    case 'label_open':
+    case 'label_close':
+      return []
     case 'footnote_reference': {
       const id = anyNode.id || ''
       return [h('text', {
