@@ -34,9 +34,9 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            npx bumpp --all --${{ inputs.bump }} --commit "chore: release v [skip ci]" --tag --push
+            npx bumpp --yes --all --${{ inputs.bump }} --commit "chore: release v [skip ci]" --tag --push
           else
-            npx bumpp --all --patch --commit "chore: release v [skip ci]" --tag --push
+            npx bumpp --yes --all --patch --commit "chore: release v [skip ci]" --tag --push
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
