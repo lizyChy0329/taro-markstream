@@ -1,3 +1,4 @@
+import './index.css'
 export { default as MarkdownRender } from './components/MarkdownRender'
 export { useSmoothMarkdownStream } from './composables/useSmoothMarkdownStream'
 export type { MarkdownRenderProps, ParsedNode } from './types'

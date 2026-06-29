@@ -6,7 +6,7 @@ declare module '*.vue' {
   export default component
 }
 
-declare module 'taro-markstream/vue' {
+declare module 'taro-markstream-vue' {
   import type { DefineComponent } from 'vue'
   export const MarkdownRender: DefineComponent<{
     content: string

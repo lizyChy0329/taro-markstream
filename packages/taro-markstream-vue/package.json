@@ -1,5 +1,5 @@
 {
-  "name": "taro-markstream",
+  "name": "taro-markstream-vue",
   "type": "module",
   "version": "1.0.0",
   "license": "MIT",
@@ -31,18 +31,22 @@
     "**/*.css"
   ],
   "exports": {
-    "./vue": {
-      "types": "./dist/vue/index.d.ts",
-      "import": "./dist/vue/index.js"
+    ".": {
+      "types": "./dist/vue/index.d.mts",
+      "import": "./dist/vue/index.mjs",
+      "default": "./dist/vue/index.mjs"
     },
-    "./vue/index.css": "./dist/vue/index.css"
+    "./index.css": {
+      "import": "./dist/vue/index.css",
+      "default": "./dist/vue/index.css"
+    }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "dev": "tsdown --watch",
-    "build": "tsdown && cp src/index.css dist/vue/index.css",
+    "dev": "NODE_PATH=$PWD/node_modules vp pack && NODE_PATH=$PWD/node_modules vp pack --watch",
+    "build": "NODE_PATH=$PWD/node_modules vp pack",
     "typecheck": "vue-tsc --noEmit"
   },
   "peerDependencies": {
@@ -55,8 +59,10 @@
   "devDependencies": {
     "@tarojs/components": "4.2.0",
     "@tarojs/taro": "4.2.0",
-    "tsdown": "^0.15.12",
+    "@tsdown/css": "^0.22.3",
+    "tsdown": "^0.22.3",
     "typescript": "^5.9.3",
+    "vite-plus": "^0.2.1",
     "vue": "^3.5.38",
     "vue-tsc": "^2.2.12"
   }

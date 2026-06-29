@@ -4,7 +4,8 @@
   "private": true,
   "description": "taro-markstream monorepo",
   "scripts": {
-    "build": "pnpm --filter taro-markstream build",
+    "dev": "vp run -r --parallel dev",
+    "build": "pnpm --filter taro-markstream-vue build",
     "dev:weapp": "pnpm --filter playground-taro dev:weapp",
     "build:weapp": "pnpm --filter playground-taro build:weapp",
     "bump:patch": "bumpp --patch --commit \"chore: release v\" --tag --push",

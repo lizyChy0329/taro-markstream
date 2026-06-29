@@ -1,11 +1,11 @@
-# taro-markstream
+# taro-markstream-vue
 
 > Taro 4 流式 Markdown 渲染器 — 面向 AI 聊天场景的最小 Vue 3 版本
 
 ## 安装
 
 ```bash
-pnpm add taro-markstream
+pnpm add taro-markstream-vue
 ```
 
 确保 peer 依赖已安装：
@@ -18,8 +18,8 @@ pnpm add vue@^3 @tarojs/components@^4 @tarojs/taro@^4
 
 ```vue
 <script setup lang="ts">
-import { MarkdownRender, useSmoothMarkdownStream } from 'taro-markstream/vue'
-import 'taro-markstream/vue/index.css'
+import { MarkdownRender, useSmoothMarkdownStream } from 'taro-markstream-vue'
+import 'taro-markstream-vue/index.css'
 
 const { visible, final, enqueue, finish } = useSmoothMarkdownStream()
 
@@ -41,8 +41,8 @@ finish()
 
 ```vue
 <script setup lang="ts">
-import { MarkdownRender } from 'taro-markstream/vue'
-import 'taro-markstream/vue/index.css'
+import { MarkdownRender } from 'taro-markstream-vue'
+import 'taro-markstream-vue/index.css'
 
 const markdown = `# Hello World
 
@@ -62,8 +62,8 @@ const markdown = `# Hello World
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { MarkdownRender, useSmoothMarkdownStream } from 'taro-markstream/vue'
-import 'taro-markstream/vue/index.css'
+import { MarkdownRender, useSmoothMarkdownStream } from 'taro-markstream-vue'
+import 'taro-markstream-vue/index.css'
 
 const { visible, final, caughtUp, pendingChars, enqueue, finish, flush, reset, pause, resume } = useSmoothMarkdownStream({
   minCharsPerSecond: 30,
@@ -89,7 +89,7 @@ function onDone() {
 ```vue
 <script setup lang="ts">
 import Taro from '@tarojs/taro'
-import { MarkdownRender } from 'taro-markstream/vue'
+import { MarkdownRender } from 'taro-markstream-vue'
 
 function handleLink(e: { href: string }) {
   Taro.setClipboardData({ data: e.href })
@@ -156,8 +156,8 @@ function handleImage(e: { src: string }) {
 ### 类型导出
 
 ```ts
-import type { MarkdownRenderProps, ParsedNode } from 'taro-markstream/vue'
-import type { SmoothMarkdownStreamOptions, SmoothMarkdownStreamController } from 'taro-markstream/vue'
+import type { MarkdownRenderProps, ParsedNode } from 'taro-markstream-vue'
+import type { SmoothMarkdownStreamOptions, SmoothMarkdownStreamController } from 'taro-markstream-vue'
 ```
 
 ## 特性
@@ -224,7 +224,7 @@ import type { SmoothMarkdownStreamOptions, SmoothMarkdownStreamController } from
 **Q: 安装报 peer dependencies 冲突？**
 A: 确保项目中已安装 `vue@^3`、`@tarojs/components@^4`、`@tarojs/taro@^4`。可在 `pnpm add` 时添加 `--save-peer` 或使用 `pnpm.overrides` 强制版本。
 
-**Q: `import 'taro-markstream/vue/index.css'` 是必须的吗？**
+**Q: `import 'taro-markstream-vue/index.css'` 是必须的吗？**
 A: 是。不导入 CSS 则没有任何样式。你可以基于内置 CSS 覆盖，或自定义全部样式。
 
 ### 运行时
@@ -288,15 +288,17 @@ taro-markstream
 ## 开发
 
 ```bash
-# 构建
+# 安装依赖
 pnpm install
-pnpm --filter taro-markstream build
 
-# 启动 playground
-pnpm --filter playground-taro dev:weapp
+# 构建 lib（CSS 由 vp pack 自动打包到 dist/vue/index.css）
+vpr build
+
+# 并行 watch lib + 微信小程序 playground
+vpr dev
 
 # 类型检查
-pnpm --filter taro-markstream typecheck
+pnpm --filter taro-markstream-vue typecheck
 ```
 
 ## License

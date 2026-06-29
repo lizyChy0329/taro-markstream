@@ -1,6 +1,5 @@
 <template>
   <view class="playground">
-    123123
     <view class="toolbar">
       <view class="preset-list">
         <view
@@ -46,7 +45,7 @@
 <script setup>
 import Taro from '@tarojs/taro'
 import { ref, computed, onMounted } from 'vue'
-import { MarkdownRender, useSmoothMarkdownStream } from 'taro-markstream/vue'
+import { MarkdownRender, useSmoothMarkdownStream } from 'taro-markstream-vue'
 import { streamContent } from '../../markdown'
 
 const presets = {
