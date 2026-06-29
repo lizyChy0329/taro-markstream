@@ -8,12 +8,12 @@
     "build": "pnpm --filter taro-markstream-vue build",
     "dev:weapp": "pnpm --filter playground-taro dev:weapp",
     "build:weapp": "pnpm --filter playground-taro build:weapp",
-    "bump:patch": "bumpp --patch --commit \"chore: release v\" --tag --push",
-    "bump:minor": "bumpp --minor --commit \"chore: release v\" --tag --push",
-    "bump:major": "bumpp --major --commit \"chore: release v\" --tag --push"
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm --filter taro-markstream-vue build && pnpm --filter taro-markstream-vue publish --no-git-checks"
   },
   "packageManager": "pnpm@11.2.2",
   "devDependencies": {
-    "bumpp": "^11.1.0"
+    "@changesets/cli": "^2.31.0"
   }
 }

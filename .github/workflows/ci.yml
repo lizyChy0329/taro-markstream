@@ -1,20 +1,28 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
-  workflow_dispatch:
-    inputs:
-      bump:
-        description: 'Bump type'
-        default: 'patch'
-        type: choice
-        options: [patch, minor, major]
+  push:
+    branches: [main]
 
 jobs:
-  ci:
+  check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter taro-markstream-vue typecheck
+      - run: pnpm --filter taro-markstream-vue build
+
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,26 +35,11 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter taro-markstream-vue typecheck
-      - run: pnpm --filter taro-markstream-vue build
-
-      - name: Bump version (push / workflow_dispatch only)
-        if: github.event_name != 'pull_request'
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            npx bumpp --yes --all --${{ inputs.bump }} --commit "chore: release v [skip ci]" --tag --push
-          else
-            npx bumpp --yes --all --patch --commit "chore: release v [skip ci]" --tag --push
-          fi
+      - uses: changesets/action@v1
+        with:
+          publish: pnpm release
+          commit: "chore: version package [skip ci]"
+          title: "Version Package"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build after bump
-        if: github.event_name != 'pull_request'
-        run: pnpm --filter taro-markstream-vue build
-
-      - name: Publish to npm
-        if: github.event_name != 'pull_request'
-        run: pnpm --filter taro-markstream-vue publish --no-git-checks
-        env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
