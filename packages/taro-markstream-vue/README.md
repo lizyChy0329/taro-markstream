@@ -1,6 +1,8 @@
 # taro-markstream-vue
 
 > Taro 4 流式 Markdown 渲染器 — 面向 AI 聊天场景的最小 Vue 3 版本
+>
+> 基于 [markstream-vue](https://github.com/lizyChy0329/markstream-vue) 的辛勤工作，感谢！
 
 ## 安装
 

@@ -105,6 +105,7 @@ function renderInlines(node: ParsedNode, ctx: RenderContext): (VNode | string)[]
     }
     case 'label_open':
     case 'label_close':
+    case 'footnote_anchor':
       return []
     case 'footnote_reference': {
       const id = anyNode.id || ''

@@ -1,16 +1,17 @@
 import { computed, getCurrentScope, onScopeDispose, ref } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import { createSmoothMarkdownStream } from 'markstream-core'
 import type { SmoothMarkdownStreamOptions } from 'markstream-core'
 
 export type { SmoothMarkdownStreamOptions }
 
 export interface SmoothMarkdownStreamController {
-  source: ReturnType<typeof ref<string>>
-  visible: ReturnType<typeof ref<string>>
-  done: ReturnType<typeof ref<boolean>>
-  final: ReturnType<typeof computed<boolean>>
-  caughtUp: ReturnType<typeof computed<boolean>>
-  pendingChars: ReturnType<typeof computed<number>>
+  source: Ref<string>
+  visible: Ref<string>
+  done: Ref<boolean>
+  final: ComputedRef<boolean>
+  caughtUp: ComputedRef<boolean>
+  pendingChars: ComputedRef<number>
   enqueue: (chunk: string) => void
   finish: (options?: { flush?: boolean }) => void
   flush: () => void

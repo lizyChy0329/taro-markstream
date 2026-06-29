@@ -47,7 +47,7 @@
   "scripts": {
     "dev": "NODE_PATH=$PWD/node_modules vp pack && NODE_PATH=$PWD/node_modules vp pack --watch",
     "build": "NODE_PATH=$PWD/node_modules vp pack",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc -b"
   },
   "peerDependencies": {
     "vue": ">=3.0.0"
