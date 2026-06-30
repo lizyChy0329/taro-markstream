@@ -49,6 +49,10 @@ vpr build                          # ON FAIL: check vite.config.ts pack block
 vpr build:weapp                    # ON FAIL: check Taro config in playground-taro/config/
 # typecheck lib
 pnpm --filter taro-markstream-vue typecheck  # ON FAIL: check vue-tsc output for type errors
+# test
+pnpm test                                  # ON FAIL: `pnpm test:watch` for interactive retry
+# test (watch)
+pnpm test:watch
 # publish (CI only)
 bump:patch / bump:minor / bump:major  # CI only — never publish from local
 ```

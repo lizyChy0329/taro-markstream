@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite-plus'
 
 export default defineConfig({
@@ -10,5 +11,10 @@ export default defineConfig({
     css: {
       fileName: 'index.css',
     },
+  },
+  test: {
+    environment: 'node',
+    include: ['test/**/*.test.ts'],
+    restoreMocks: true,
   },
 })
