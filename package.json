@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vp run -r --parallel dev",
     "build": "pnpm --filter taro-markstream-vue build",
+    "test": "pnpm --filter taro-markstream-vue test",
+    "test:watch": "pnpm --filter taro-markstream-vue test:watch",
     "dev:weapp": "pnpm --filter playground-taro dev:weapp",
     "build:weapp": "pnpm --filter playground-taro build:weapp",
     "changeset": "changeset",
