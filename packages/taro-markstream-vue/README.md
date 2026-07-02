@@ -280,7 +280,7 @@ pnpm --filter taro-markstream-vue typecheck  # 类型检查
 
 ### 样式3
 
-<img width="351" height="684" alt="3" src="https://github.com/user-attachments/assets/f4173eb7-8654-4e4a-b2d0-542cfe2efb6f" />
+<img width="351" height="684" alt="fc4341ef-398b-4c20-8e27-c11d357dfd23" src="https://github.com/user-attachments/assets/881fcbdf-a38a-43fd-bd00-3c6cbfa21d08" />
 
 ### 样式4
 
